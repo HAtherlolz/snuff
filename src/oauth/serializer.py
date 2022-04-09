@@ -23,7 +23,7 @@ class UserDjoserSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AuthUser
-        fields = ('avatar', 'country', 'city', 'bio', 'display_name')
+        fields = ('id', 'avatar', 'country', 'city', 'bio', 'display_name')
 
 
 class SocialLinkSerializer(serializers.ModelSerializer):

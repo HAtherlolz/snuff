@@ -37,7 +37,6 @@ class Album(models.Model):
     cover = models.ImageField(
         upload_to=get_path_upload_cover_album,
         blank=True,
-        null=True,
         validators=[FileExtensionValidator(allowed_extensions=['jpg']), validate_size_image]
     )
 
@@ -45,7 +44,7 @@ class Album(models.Model):
 class Track(models.Model):
     """ Модель треков
     """
-    user = models.ForeignKey(AuthUser, on_delete=models.CASCADE, related_name='tracks')
+    user = models.ForeignKey(AuthUser, on_delete=models.CASCADE, related_name='tracks', null=True)
     title = models.CharField(max_length=100)
     license = models.ForeignKey(License, on_delete=models.PROTECT, related_name='license_tracks', null=True, blank=True)
     genre = models.ManyToManyField(Genre, related_name='track_genres')
@@ -55,6 +54,7 @@ class Track(models.Model):
         upload_to=get_path_upload_track,
         validators=[FileExtensionValidator(allowed_extensions=['mp3', 'wav'])]
     )
+    tracks_text = models.TextField(max_length=2000, null=True, blank=True)
     create_at = models.DateTimeField(auto_now_add=True)
     plays_count = models.PositiveIntegerField(default=0)
     download = models.PositiveIntegerField(default=0)

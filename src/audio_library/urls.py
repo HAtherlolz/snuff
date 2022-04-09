@@ -6,14 +6,16 @@ urlpatterns = [
     path('genre/', views.GenreView.as_view()),
 
     path('license/', views.LicenseView.as_view({'get': 'list', 'post': 'create'})),
-    path('license/<int:pk>/', views.LicenseView.as_view({'put': 'update', 'delete': 'destroy'})),
+    path('license/<int:pk>/', views.LicenseView.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
 
     path('album/', views.AlbumView.as_view({'get': 'list', 'post': 'create'})),
-    path('album/<int:pk>/', views.AlbumView.as_view({'put': 'update', 'delete': 'destroy'})),
+    path('album/<int:pk>/', views.AlbumView.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
 
     path('author-album/<int:pk>/', views.PublicAlbumView.as_view()),
 
     path('track/', views.TrackView.as_view({'get': 'list', 'post': 'create'})),
+    path('all_tracks/', views.TrackView.as_view({'get': 'get_all_tracks'})),
+    path('album/<int:pk>/tracks/', views.TrackView.as_view({'get': 'get_tracks_by_album'})),
     path('track/<int:pk>/', views.TrackView.as_view({'put': 'update', 'delete': 'destroy'})),
 
     path('stream-track/<int:pk>/', views.StreamingFileView.as_view()),

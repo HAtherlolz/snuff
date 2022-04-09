@@ -2,6 +2,7 @@ from rest_framework import serializers
 from . import models
 from ..base.services import delete_old_file
 from ..oauth.serializer import AuthorSerializer
+from drf_writable_nested import WritableNestedModelSerializer
 
 
 class BaseSerializer(serializers.ModelSerializer):
@@ -26,19 +27,24 @@ class AlbumSerializer(BaseSerializer):
         fields = ('id', 'name', 'description', 'cover', 'private')
 
     def update(self, instance, validated_data):
-        delete_old_file(instance.cover.path)
+        if instance.cover:
+            delete_old_file(instance.cover.path)
         return super().update(instance, validated_data)
 
 
-class CreateAuthorTrackSerializer(BaseSerializer):
+class CreateAuthorTrackSerializer(serializers.ModelSerializer):
     plays_count = serializers.IntegerField(read_only=True)
     download = serializers.IntegerField(read_only=True)
-    user = serializers.IntegerField(read_only=True)
+    # user = serializers.IntegerField(read_only=True)
+    # genre = serializers.SlugRelatedField(
+    #     many=True,
+    #     read_only=False,
+    #     slug_field='id'
+    # )
 
     class Meta:
         model = models.Track
         fields = (
-            'id',
             'title',
             'license',
             'genre',
@@ -55,6 +61,7 @@ class CreateAuthorTrackSerializer(BaseSerializer):
             'is_remix',
             'cover_on_music',
             'remix_on_music',
+            'tracks_text'
         )
 
     def update(self, instance, validated_data):

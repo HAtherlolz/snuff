@@ -3,12 +3,16 @@ import os
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, viewsets, parsers, views
+from rest_framework import generics, viewsets, parsers, views, status
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from . import models, serializer
 from ..base.classes import MixedSerializer, Pagination
 from ..base.permissions import IsAuthor
 from ..base.services import delete_old_file
+from src.oauth.models import AuthUser
 
 
 class GenreView(generics.ListAPIView):
@@ -36,7 +40,7 @@ class AlbumView(viewsets.ModelViewSet):
     """
     parser_classes = (parsers.MultiPartParser,)
     serializer_class = serializer.AlbumSerializer
-    # permission_classes = [IsAuthor]
+    permission_classes = [IsAuthor]
 
     def get_queryset(self):
         return models.Album.objects.filter(user=self.request.user)
@@ -61,23 +65,51 @@ class PublicAlbumView(generics.ListAPIView):
 class TrackView(MixedSerializer, viewsets.ModelViewSet):
     """ CRUD треков
     """
+    queryset = models.Track.objects.all()
     parser_classes = (parsers.MultiPartParser,)
-    # permission_classes = [IsAuthor]
+    permission_classes = [IsAuthor]
     serializer_class = serializer.CreateAuthorTrackSerializer
     serializer_classes_by_action = {
         'list': serializer.AuthorTrackSerializer
     }
 
+    # def get_permissions(self):
+    #     if self.action == 'get_all_tracks':
+    #         permission_classes = AllowAny
+    #     return super().get_permissions()
+
     def get_queryset(self):
         return models.Track.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        user = AuthUser.objects.get(email=self.request.user)
+        serializer.save(user=user)
+
+    # def create(self, request):
+    #     serializer = self.serializer_class(data=request.data)
+    #     if serializer.is_valid(raise_exception=True):
+    #         print(request.user)
+    #         serializer.validated_data['user'] = request.user
+    #         serializer.save()
+    #         return Response(serializer.data, status.HTTP_201_CREATED)
+
 
     def perform_destroy(self, instance):
         delete_old_file(instance.cover.path)
         delete_old_file(instance.file.path)
         instance.delete()
+
+    @action(detail=True, methods=["get"])
+    def get_all_tracks(self, request):
+        tracks = models.Track.objects.all()
+        serializers = serializer.AuthorTrackSerializer(tracks, many=True)
+        return Response(serializers.data, status.HTTP_200_OK)
+
+    @action(detail=True, methods=["get"])
+    def get_tracks_by_album(self, request, pk):
+        tracks = models.Track.objects.filter(album=pk)
+        serializers = serializer.AuthorTrackSerializer(tracks, many=True)
+        return Response(serializers.data, status.HTTP_200_OK)
 
 
 class PlayListView(MixedSerializer, viewsets.ModelViewSet):

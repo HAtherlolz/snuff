@@ -34,7 +34,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'corsheaders',
     'rest_framework',
+    'django_filters',
     'drf_yasg',
     'djoser',
 
@@ -44,6 +46,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -148,7 +151,12 @@ GOOGLE_SECRET_KEY = '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'
 SPOTIFY_CLIENT_ID = 'c348ed49d711407c982f093f3dd25b49'
 SPOTIFY_SECRET_ID = 'c8bedae09ef44edfb562d898fe4b26db'
 
-CSRF_TRUSTED_ORIGINS = ['https://*.herokuapp.com', 'http://*localhost', 'http://localhost:3000']
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.herokuapp.com',
+    'http://*localhost',
+    'http://localhost:3000',
+    'http://localhost:8080'
+]
 
 
 CORS_ORIGIN_ALLOW_ALL = True
